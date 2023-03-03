@@ -1,7 +1,6 @@
-.container{
+.container {
   height: 500px;
   width: 100%;
-  /* border: 2px solid cyan; */
   text-align: center;
   padding: 2em;
   display: flex;
@@ -11,43 +10,48 @@
   gap: 0.6em;
 }
 
-
-.container label{
+.container label {
   font-size: 1.6rem;
   color: cyan;
 }
 
-.container input{
+.container input {
   height: 7%;
   width: 60%;
   border-radius: 8px;
   padding-left: 8px;
   font-size: 1.2rem;
   outline: none;
+  border: none;
 }
 
-.container input::placeholder{
+.container input::placeholder {
   color: #999;
 }
 
-.container button{
+.container button {
   width: 70%;
   height: 10%;
   border-radius: 8px;
   font-size: 1.6rem;
   font-weight: bold;
-  color:white;
+  color: white;
   background-color: #3b82f6;
   border: none;
+  cursor: pointer;
+}
+.container button[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
-.symbol{
+.symbol {
   display: inline-block;
   color: yellow;
   font-size: 2.4rem;
 }
 
-.span{
+.span {
   color: purple;
   font-size: 3.2rem;
 }

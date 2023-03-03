@@ -6,17 +6,38 @@ import {
   LAMPORTS_PER_SOL,
   clusterApiUrl,
 } from "@solana/web3.js";
+import Backdrop from "@mui/material/Backdrop";
+import CircularProgress from "@mui/material/CircularProgress";
+import SuccessDialog from "./components/SuccessDialog";
+import Error from "./components/Error";
+import WaitingAlert from "./components/WaitingAlert";
 
 function App() {
   const [address, setAddress] = useState("");
+  const [open, setOpen] = useState(false);
+  const [showDialog, setShowDialog] = useState(false);
+  const [showError, setShowError] = useState(false);
+  const [showWaitingAlert, setShowWaitingAlert] = useState(false);
+  const [showSignature, setSignature] = useState("");
+
+  const handleClose = () => {
+    setShowDialog(false);
+  };
+
+  const handleErrorClose = () => {
+    setShowError(false);
+  };
+  const handleWaitingAlertClose = () => {
+    setShowWaitingAlert(false);
+  };
+
   const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
 
   async function airDropSol() {
     try {
       const ADDRESS = new PublicKey(address);
 
-      // console.log(PublicKey.isOnCurve(ADDRESS));
-
+      setShowWaitingAlert(true);
       const signature = await connection.requestAirdrop(
         ADDRESS,
         LAMPORTS_PER_SOL
@@ -25,7 +46,6 @@ function App() {
       const { blockhash, lastValidBlockHeight } =
         await connection.getLatestBlockhash();
 
-      // 3 - Confirm transaction success
       await connection.confirmTransaction(
         {
           blockhash,
@@ -35,19 +55,33 @@ function App() {
         "finalized"
       );
 
-      // 4 - Log results
-      console.log(
-        `Tx Complete: https://explorer.solana.com/tx/${signature}?cluster=devnet`
-      );
+      setOpen(false);
+      setSignature(signature);
+      setShowDialog(true);
     } catch (error) {
-      console.log(error);
-      return;
+      setOpen(false);
+      setShowError(true);
     }
-
     setAddress("");
   }
   return (
     <>
+      <Backdrop
+        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={open}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
+      <SuccessDialog
+        open={showDialog}
+        onClose={handleClose}
+        signature={showSignature}
+      />
+      <Error showError={showError} onClose={handleErrorClose}></Error>
+      <WaitingAlert
+        showWaitingAlert={showWaitingAlert}
+        onClose={handleWaitingAlertClose}
+      ></WaitingAlert>
       <div className="container">
         <h1>
           <span className="span"> Solana Devnet Faucet:</span> Get Free SOL for
@@ -65,7 +99,18 @@ function App() {
           onChange={(e) => setAddress(e.target.value)}
           required
         />
-        <button onClick={airDropSol}>Send Request</button>
+        <button
+          onClick={() => {
+            setOpen(true);
+            airDropSol();
+          }}
+          disabled={address.length < 32}
+          title={
+            address.length >= 32 ? "" : "Please enter a Solana address first."
+          }
+        >
+          Send Request
+        </button>
       </div>
     </>
   );
